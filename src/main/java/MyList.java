@@ -1,5 +1,6 @@
 package mylist;
 
+import java.lang.IllegalArgumentException;
 import java.util.List;
 
 public class MyList<E> {
@@ -8,8 +9,9 @@ public class MyList<E> {
   // MyList properties
   private Node<E> head;
   private Node<E> tail;
-  private int listSize;
+  private int listSize = 0;
 
+// ====== NODE PRIVATE CLASS ============================
   private static class Node<E> {
     // Private Node class that will represent each
     // item in a MyList instance
@@ -18,7 +20,9 @@ public class MyList<E> {
     private Node<E> next;
     private Node<E> previous;
 
-    public Node(E element) {
+    public Node(Node<E> previous, Node<E> next, E element) {
+      this.previous = previous;
+      this.next = next;
       this.element = element;
     }
   }
@@ -41,10 +45,8 @@ public class MyList<E> {
     }
   }
 
-  private void linkLast(Node<E> nodeToAppend) {
+  private void linkLast(Node<E> last, Node<E> nodeToAppend) {
     // Places the provided node at the tail
-
-    Node<E> last = this.tail;
 
     if(last == null) {
       // No elements in list, so head and tail are
@@ -54,12 +56,13 @@ public class MyList<E> {
     } else {
       this.tail = nodeToAppend;
       last.next = nodeToAppend;
-      nodeToAppend.previous = last;
     }
+
+    this.listSize++;
   }
 
   // Refactor considering the shortest way to move: forwards or backwards
-  private void linkBefore(Node<E> nodeToInsert, int index) {
+  private void linkBefore(int index, Node<E> nodeToInsert) {
     // Insert provided node at provided index
 
     int currentNodeIndex = 0;
@@ -73,6 +76,7 @@ public class MyList<E> {
     nodeToInsert.next = currentNode.next;
     nodeToInsert.previous = currentNode;
     currentNode.next = nodeToInsert;
+    this.listSize++;
   }
 
   private void unlinkFirst() {
@@ -156,44 +160,51 @@ public class MyList<E> {
 
 // ======== LIST INTERFACE METHODS IMPLEMENTATION ========
 
+  public int size() {
+      // Return the quantity of elements in the list
+
+      return this.listSize;
+  }
+
   public boolean add(E e) {
     // Appends the specified element to the end of this list (optional operation).
 
-    Node<E> currentNode = this.head;
+    Node<E> last = this.tail;
     Node<E> nodeToAppend;
 
-    if (currentNode == null) {
-      this.head = new Node<E>(e);
-      return true;
+    if (e == null) {
+      // Throw exception if null is passed as argument
+      throw new IllegalArgumentException();
     }
 
-    while (currentNode.next != null) {
-      currentNode = currentNode.next;
-    }
+    nodeToAppend = new Node<E>(last, null, e);
 
-    nodeToAppend = new Node<E>(e);
-    currentNode.next = nodeToAppend;
+    this.linkLast(last, nodeToAppend);
+
     return true;
   }
 
-  // Test this and check for possible edge cases.
   public void add(int index, E e) {
-    // Inserts the specified element at the specified position in this list (optional operation).
+    // Inserts the specified element at
+    // the specified position in this list (optional operation).
 
-    int currentIndex = 0;
-    Node<E> currentNode = this.head;
     Node<E> nodeToInsert;
+    int size = this.listSize;
 
-    while (currentIndex < index - 1) {
-      currentIndex++;
-      currentNode = currentNode.next;
+    if (e == null) {
+      // Throw exception if null is passed as argument
+      throw new IllegalArgumentException();
     }
 
-    nodeToInsert = new Node<E>(e);
-    nodeToInsert.next = currentNode.next;
-    currentNode.next = nodeToInsert;
+    // Throw OutOfBoundException if index is larger equal or greater than
+    // list size
+    if (index >= size) {
 
-    // Think about error cases to handle them
+    }
+
+    nodeToInsert = new Node<E>(null, null, e);
+
+    this.linkBefore(index, nodeToInsert);
   }
 
 }
